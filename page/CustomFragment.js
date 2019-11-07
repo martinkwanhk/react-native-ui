@@ -1,14 +1,14 @@
 import React from 'react';
-import {StyleSheet, View, ScrollView, FlatList, Text, Image, TouchableOpacity, TouchableWithoutFeedback, Dimensions, Alert} from 'react-native';
-
-const screenWidth = Dimensions.get('window').width;
+import {StyleSheet, View, ScrollView, FlatList, Text, Image} from 'react-native';
 
 export default class CustomFragment extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-
+      componentList: [
+        {name: 'UISlider', page: 'UISlider'},
+      ],
     }
   }
 
@@ -20,9 +20,9 @@ export default class CustomFragment extends React.Component {
     let self = this;
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.content}>
+        <FlatList style={styles.content}>
           
-        </ScrollView>
+        </FlatList>
       </View>
     );
   }
