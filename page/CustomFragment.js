@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, ScrollView, FlatList, Text, Image} from 'react-native';
+import {StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Text} from 'react-native';
 
 export default class CustomFragment extends React.Component {
 
@@ -19,11 +19,15 @@ export default class CustomFragment extends React.Component {
   render() {
     let self = this;
     return (
-      <View style={styles.container}>
-        <FlatList style={styles.content}>
-          
-        </FlatList>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <FlatList style={styles.content} data={this.state.componentList} renderItem={({item, index, separators}) => {
+          return (
+            <TouchableOpacity navigation={this.props.navigation} onPress={() => this.props.navigation.navigate('UISlider', {})}>
+              <Text style={styles.item}>item.name</Text>
+            </TouchableOpacity>
+          )
+        }} />
+      </SafeAreaView>
     );
   }
 
@@ -41,6 +45,17 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: '#FFF',
   },
-
+  item: {
+    width: '100%',
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 10,
+    paddingRight: 10,
+    color: '#5d5d5d',
+    fontSize: 14,
+    textAlign: 'left',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDD',
+  }
 
 });
