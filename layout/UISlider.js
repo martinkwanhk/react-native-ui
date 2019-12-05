@@ -10,6 +10,9 @@ export default class UISlider extends React.Component {
     this.state = {
       isDragging: true,
       isIdle: true,
+      initialDragPosition: 0,
+      lastDragPosition: 0,
+      initialDragDirection: 0,
       dragDirection: 0,
       currIdx: 0,
     }
@@ -20,11 +23,25 @@ export default class UISlider extends React.Component {
       animated: true,
       index: this.state.currIdx,
     });
+    this.setAutoScroll();
   }
 
-  onScrollSlide(e) {
-    console.log(e.nativeEvent.contentOffset);
-    this.setState({dragDirection: e.nativeEvent.contentOffset > 0 ? -1 : 1});
+  setAutoScroll() {
+    var self = this;
+    slide = () => {
+      setTimeout(() => {
+        if (!self.state.isIdle) {
+          self.setState({isIdle: true});
+          return;
+        }
+        self.setState({
+          initialDragDirection: -1,
+          dragDirection: -1,
+        });
+        self.onScrollEnd();
+      }, self.props.slideDuration ? parseInt(self.props.slideDuration) : 3000)
+    }
+    slide();
   }
 
   onScrollBegin() {
@@ -34,31 +51,64 @@ export default class UISlider extends React.Component {
     });
   }
 
+  onScrollSlide(e) {
+    if (!this.state.isDragging) {
+      return;
+    }
+    if (this.state.initialDragDirection == 0) {
+      // First drag
+      let x = e.nativeEvent.contentOffset.x;
+      let direction = x > this.state.currIdx * screenWidth ? -1 : 1;
+      this.setState({
+        initialDragPosition: x,
+        lastDragPosition: x,
+        initialDragDirection: direction,
+      });
+      return;
+    }
+    let x = e.nativeEvent.contentOffset.x;
+    let direction = x > this.state.lastDragPosition ? -1 : 1;
+    this.setState({
+      lastDragPosition: x,
+      dragDirection: direction,
+    });
+  }
+
   onScrollEnd() {
     let idx = this.state.currIdx;
-    if (this.state.dragDirection == 1) {
-      if (idx >= this.props.slideList.length - 1) {
-        idx = 0;
-      } else {
-        idx += 1;
-      }
-    } else {
-      if (idx <= 0) {
-        idx = this.props.slideList.length - 1;
-      } else {
-        idx -= 1;
+    // To left
+    if (this.state.initialDragDirection == 1) {
+      if (this.state.dragDirection == 1) {
+        if (idx <= 0) {
+          idx = this.props.slideList.length - 1;
+        } else {
+          idx -= 1;
+        }
       }
     }
-    this.setState({
-      dragDirection: 0,
-      isDragging: false,
-      isIdle: true,
-      currIdx: idx,
-    });
+    // To right
+    if (this.state.initialDragDirection == -1) {
+      if (this.state.dragDirection == -1) {
+        if (idx >= this.props.slideList.length - 1) {
+          idx = 0;
+        } else {
+          idx += 1;
+        }
+      }
+    }
     this.flatListRef.scrollToIndex({
       animated: true,
-      index: this.state.currIdx,
+      index: idx,
     });
+    this.setState({
+      initialDragDirection: 0,
+      dragDirection: 0,
+      initialDragPosition: 0,
+      lastDragPosition: 0,
+      isDragging: false,
+      currIdx: idx,
+    });
+    this.setAutoScroll();
   }
 
   render() {
@@ -78,6 +128,8 @@ export default class UISlider extends React.Component {
           width: '100%',
           height: height,
         }}
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={item => item.id}
         ref={(ref) => { this.flatListRef = ref; }}
         onScroll={(e) => {
           this.onScrollSlide(e);

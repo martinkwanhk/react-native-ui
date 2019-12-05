@@ -25,17 +25,6 @@ export default class CustomFragment extends React.Component {
     return (
       <SafeAreaView style={styles.container}>
         <UISlider style={styles.slider} height={240} slideList={this.state.slideList} />
-        <FlatList horizontal data={this.state.slideList} style={{
-          width: '100%',
-          height: 240,
-        }} onScroll={(e) => {
-          
-        }} renderItem={({item, index, separators}) => (
-          <Image source={{uri: item.thumbnail}} style={{
-            width: 300,
-            height: 240,
-          }} />
-        )} />
       </SafeAreaView>
     );
   }
