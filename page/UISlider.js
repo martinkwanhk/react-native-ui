@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, SafeAreaView} from 'react-native';
+import {StyleSheet, SafeAreaView, FlatList, Image} from 'react-native';
 
 import UISlider from './../layout/UISlider';
 
@@ -9,9 +9,10 @@ export default class CustomFragment extends React.Component {
     super(props);
     this.state = {
       slideList: [
-        {thumbnail: 'https://brideunionhk.com/image/slider-1.jpg'},
-        {thumbnail: 'https://brideunionhk.com/image/slider-2.jpg'},
-        {thumbnail: 'https://brideunionhk.com/image/slider-3.jpg'},
+        {thumbnail: 'https://onmygrad.com/image/home-banner-1.jpg'},
+        {thumbnail: 'https://onmygrad.com/image/home-banner-2.jpg'},
+        {thumbnail: 'https://onmygrad.com/image/home-banner-3.jpg'},
+        {thumbnail: 'https://onmygrad.com/image/home-banner-4.jpg'},
       ],
     }
   }
@@ -23,7 +24,18 @@ export default class CustomFragment extends React.Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        <UISlider height={240} slideList={this.slideList} />
+        <UISlider style={styles.slider} height={240} slideList={this.state.slideList} />
+        <FlatList horizontal data={this.state.slideList} style={{
+          width: '100%',
+          height: 240,
+        }} onScroll={(e) => {
+          
+        }} renderItem={({item, index, separators}) => (
+          <Image source={{uri: item.thumbnail}} style={{
+            width: 300,
+            height: 240,
+          }} />
+        )} />
       </SafeAreaView>
     );
   }
@@ -38,6 +50,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-
 
 });

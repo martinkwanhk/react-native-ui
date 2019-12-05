@@ -8,9 +8,9 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import ComponentFragment from './page/ComponentFragment';
 import CustomFragment from './page/CustomFragment';
 
-import FlatListPage from './page/FlatListPage';
+import ReactFlatList from './page/ReactFlatList';
 
-import SliderPage from './page/SliderPage';
+import UISlider from './page/UISlider';
 
 export default class App extends React.Component {
   render() {
@@ -72,8 +72,8 @@ const AppNavigator = createStackNavigator({
   },
 
   // Component
-  FlatListPage: {
-    screen: FlatListPage,
+  ReactFlatList: {
+    screen: ReactFlatList,
     navigationOptions: {
       title: 'Flat List',
       headerStyle: {
@@ -88,8 +88,8 @@ const AppNavigator = createStackNavigator({
   },
 
   // Custom
-  SliderPage: {
-    screen: SliderPage,
+  UISlider: {
+    screen: UISlider,
     navigationOptions: {
       title: 'Slider',
       headerStyle: {
