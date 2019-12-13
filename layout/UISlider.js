@@ -12,6 +12,8 @@ export default class UISlider extends React.Component {
       isIdle: true,
       dragDirection: 0,
       currIdx: 0,
+      slideDuration: !isNaN(parseInt(this.props.slideDuration)) ? this.props.slideDuration : 4000,
+      timeout: null,
     }
   }
 
@@ -20,6 +22,18 @@ export default class UISlider extends React.Component {
       animated: true,
       index: this.state.currIdx,
     });
+    this.startAutoScroll();
+  }
+
+  startAutoScroll() {
+    let self = this;
+    if (!this.state.timeout) {
+      this.setState({
+        timeout: setTimeout(function() {
+          onScrollEnd();
+        }, self.slideDuration),
+      });
+    }
   }
 
   onScrollSlide(e) {
@@ -32,6 +46,12 @@ export default class UISlider extends React.Component {
       isDragging: true,
       isIdle: false,
     });
+    if (this.state.timeout) {
+      clearTimeout(this.state.timeout);
+      this.setState({
+        timeout: null,
+      });
+    }
   }
 
   onScrollEnd() {
@@ -49,16 +69,17 @@ export default class UISlider extends React.Component {
         idx -= 1;
       }
     }
+    this.flatListRef.scrollToIndex({
+      animated: true,
+      index: this.state.currIdx,
+    });
     this.setState({
       dragDirection: 0,
       isDragging: false,
       isIdle: true,
       currIdx: idx,
     });
-    this.flatListRef.scrollToIndex({
-      animated: true,
-      index: this.state.currIdx,
-    });
+    this.startAutoScroll();
   }
 
   render() {
