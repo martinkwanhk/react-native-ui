@@ -28,6 +28,12 @@ export default class UISlider extends React.Component {
     this.setAutoScroll();
   }
 
+  componentWillUnmount() {
+    if (this.state.timeout) {
+      clearTimeout(this.state.timeout);
+    }
+  }
+
   setAutoScroll() {
     var self = this;
     slide = () => {
@@ -83,6 +89,9 @@ export default class UISlider extends React.Component {
   }
 
   onScrollEnd() {
+    if (!this || !this.flatListRef) {
+      return;
+    }
     let idx = this.state.currIdx;
     // To left
     if (this.state.initialDragDirection == 1) {
