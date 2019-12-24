@@ -15,6 +15,8 @@ export default class UISlider extends React.Component {
       initialDragDirection: 0,
       dragDirection: 0,
       currIdx: 0,
+      slideLoop: this.props.slideLoop === false ? false : true,
+      slideList: [],
       slideDuration: !isNaN(parseInt(this.props.slideDuration)) ? this.props.slideDuration : 4000,
       timeout: null,
     }
@@ -36,20 +38,26 @@ export default class UISlider extends React.Component {
 
   setAutoScroll() {
     var self = this;
+    if (this.state.timeout) {
+      clearTimeout(this.state.timeout);
+    }
     slide = () => {
-      setTimeout(() => {
-        if (!self.state.isIdle) {
-          self.setState({isIdle: true});
-          return;
-        }
-        self.setState({
-          initialDragDirection: -1,
-          dragDirection: -1,
-        });
-        self.onScrollEnd();
-      }, self.props.slideDuration ? parseInt(self.props.slideDuration) : 3000)
+      self.setState({
+        timeout: setTimeout(() => {
+          if (!self.state.isIdle) {
+            self.setState({isIdle: true});
+            return;
+          }
+          self.setState({
+            initialDragDirection: -1,
+            dragDirection: -1,
+          });
+          self.onScrollEnd();
+        }, self.props.slideDuration ? parseInt(self.props.slideDuration) : 4000),
+      });
     }
     slide();
+    console.log('set timeout');
   }
 
   onScrollBegin() {
@@ -59,9 +67,6 @@ export default class UISlider extends React.Component {
     });
     if (this.state.timeout) {
       clearTimeout(this.state.timeout);
-      this.setState({
-        timeout: null,
-      });
     }
   }
 
@@ -96,7 +101,7 @@ export default class UISlider extends React.Component {
     // To left
     if (this.state.initialDragDirection == 1) {
       if (this.state.dragDirection == 1) {
-        if (idx <= 0) {
+        if (idx <= 0 && this.state.slideLoop) {
           idx = this.props.slideList.length - 1;
         } else {
           idx -= 1;
@@ -106,7 +111,7 @@ export default class UISlider extends React.Component {
     // To right
     if (this.state.initialDragDirection == -1) {
       if (this.state.dragDirection == -1) {
-        if (idx >= this.props.slideList.length - 1) {
+        if (idx >= this.props.slideList.length - 1 && this.state.slideLoop) {
           idx = 0;
         } else {
           idx += 1;

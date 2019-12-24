@@ -1,9 +1,9 @@
 import React from 'react';
-import {StyleSheet, SafeAreaView, FlatList, Image} from 'react-native';
+import {StyleSheet, KeyboardAvoidingView, View, ScrollView, Image, Text, TouchableOpacity} from 'react-native';
 
 //import UIEditor from './../layout/UIEditor';
 
-export default class CustomFragment extends React.Component {
+export default class UIEditor extends React.Component {
 
   constructor(props) {
     super(props);
@@ -16,11 +16,25 @@ export default class CustomFragment extends React.Component {
     
   }
 
+  executeCommand(cmd) {
+
+  }
+
   render() {
     return (
-      <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView style={styles.container}>
+        <View style={styles.header}>
+
+        </View>
         
-      </SafeAreaView>
+        <View style={styles.editable}>
+
+        </View>
+
+        <ScrollView style={styles.menu} horizontal={true}>
+
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -29,10 +43,43 @@ export default class CustomFragment extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
     height: '100%',
+  },
+
+  header: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+  },
+
+  editable: {
+    flex: 1,
+    width: '100%',
+  },
+
+  menu: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 5,
+    paddingRight: 5,
+    borderTopColor: '#CCC',
+    borderTopWidth: 1,
+  },
+  menuBtn: {
+    
+  },
+  menuBtnImg: {
+
+  },
+  menuDivider: {
+    
   },
 
 });

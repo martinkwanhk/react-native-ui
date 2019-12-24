@@ -3,7 +3,7 @@ import {StyleSheet, SafeAreaView, FlatList, Image} from 'react-native';
 
 import UISlider from './../layout/UISlider';
 
-export default class CustomFragment extends React.Component {
+export default class UISliderPage extends React.Component {
 
   constructor(props) {
     super(props);
@@ -24,7 +24,11 @@ export default class CustomFragment extends React.Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        <UISlider style={styles.slider} height={240} slideList={this.state.slideList} />
+        <UISlider 
+          style={styles.slider} 
+          height={240} 
+          slideList={this.state.slideList}
+          slideLoop={true} />
       </SafeAreaView>
     );
   }

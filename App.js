@@ -11,6 +11,7 @@ import CustomFragment from './page/CustomFragment';
 import ReactFlatList from './page/ReactFlatList';
 
 import UISlider from './page/UISlider';
+import UIEditor from './page/UIEditor';
 
 export default class App extends React.Component {
   render() {
@@ -92,6 +93,20 @@ const AppNavigator = createStackNavigator({
     screen: UISlider,
     navigationOptions: {
       title: 'Slider',
+      headerStyle: {
+        backgroundColor: '#EEE',
+      },
+      headerTintColor: '#5d5d5d',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+      headerBackTitle: 'back',
+    },
+  },
+  UIEditor: {
+    screen: UIEditor,
+    navigationOptions: {
+      title: 'Rich Text Editor',
       headerStyle: {
         backgroundColor: '#EEE',
       },
