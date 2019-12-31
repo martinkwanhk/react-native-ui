@@ -16,18 +16,30 @@ export default class UISlider extends React.Component {
       dragDirection: 0,
       currIdx: 0,
       slideLoop: this.props.slideLoop === false ? false : true,
-      slideList: [],
+      slideList: [{}],
       slideDuration: !isNaN(parseInt(this.props.slideDuration)) ? this.props.slideDuration : 4000,
       timeout: null,
     }
   }
 
   componentDidMount() {
-    this.flatListRef.scrollToIndex({
-      animated: true,
-      index: this.state.currIdx,
-    });
-    this.setAutoScroll();
+    // Init sequence if no loop
+    if (this.state.slideLoop) {
+      let slideList = [];
+      slideList.push(this.props.slideList[this.props.slideList.length - 1]);
+      for (let i in this.props.slideList) {
+        slideList.push(this.props.slideList[i]);
+      }
+      slideList.push(this.props.slideList[0]);
+      this.setState({
+        slideList: slideList,
+        currIdx: this.state.slideLoop ? 1 : 0,
+      });
+    }
+    let self = this;
+    setTimeout(() => {
+      self.startScroll();
+    }, 10);
   }
 
   componentWillUnmount() {
@@ -36,11 +48,23 @@ export default class UISlider extends React.Component {
     }
   }
 
+  startScroll() {
+    this.flatListRef.scrollToIndex({
+      animated: true,
+      index: this.state.currIdx,
+    });
+    this.setAutoScroll();
+  }
+
   setAutoScroll() {
+    console.log('auto scroll' + new Date().getTime());
     var self = this;
     if (this.state.timeout) {
       clearTimeout(this.state.timeout);
     }
+    this.setState({
+      isIdle: true,
+    });
     slide = () => {
       self.setState({
         timeout: setTimeout(() => {
@@ -57,7 +81,6 @@ export default class UISlider extends React.Component {
       });
     }
     slide();
-    console.log('set timeout');
   }
 
   onScrollBegin() {
@@ -97,24 +120,48 @@ export default class UISlider extends React.Component {
     if (!this || !this.flatListRef) {
       return;
     }
-    let idx = this.state.currIdx;
-    // To left
-    if (this.state.initialDragDirection == 1) {
-      if (this.state.dragDirection == 1) {
-        if (idx <= 0 && this.state.slideLoop) {
-          idx = this.props.slideList.length - 1;
-        } else {
+    if (this.dragDirection == 0) {
+      return;
+    }
+    let idx = this.state.currIdx, jumpIdx = false;
+    if (this.state.slideLoop) {
+      // To left
+      if (this.state.initialDragDirection == 1) {
+        if (this.state.dragDirection == 1) {
           idx -= 1;
+          if (idx <= 0) {
+            jumpIdx = this.state.slideList.length - 1;
+          }
         }
       }
-    }
-    // To right
-    if (this.state.initialDragDirection == -1) {
-      if (this.state.dragDirection == -1) {
-        if (idx >= this.props.slideList.length - 1 && this.state.slideLoop) {
-          idx = 0;
-        } else {
+      // To right
+      if (this.state.initialDragDirection == -1) {
+        if (this.state.dragDirection == -1) {
           idx += 1;
+          if (idx >= this.state.slideList.length - 1) {
+            jumpIdx = 1;
+          }
+        }
+      }
+    } else {
+      // To left
+      if (this.state.initialDragDirection == 1) {
+        if (this.state.dragDirection == 1) {
+          if (idx <= 0) {
+            idx = this.props.slideList.length - 1;
+          } else {
+            idx -= 1;
+          }
+        }
+      }
+      // To right
+      if (this.state.initialDragDirection == -1) {
+        if (this.state.dragDirection == -1) {
+          if (idx >= this.props.slideList.length - 1) {
+            idx = 0;
+          } else {
+            idx += 1;
+          }
         }
       }
     }
@@ -128,9 +175,25 @@ export default class UISlider extends React.Component {
       initialDragPosition: 0,
       lastDragPosition: 0,
       isDragging: false,
-      currIdx: idx,
+      currIdx: jumpIdx !== false ? jumpIdx : idx,
     });
-    this.setAutoScroll();
+    let self = this;
+    setTimeout(() => {
+      if (jumpIdx !== false) {
+        self.setState({
+          currIdx: jumpIdx,
+        });
+        self.flatListRef.scrollToIndex({
+          animated: false,
+          index: jumpIdx,
+        });
+      }
+      self.setAutoScroll();
+    }, 500);
+  }
+
+  onScrollAnimEnd() {
+    
   }
 
   render() {
@@ -146,7 +209,10 @@ export default class UISlider extends React.Component {
         borderBottomWidth: 1,
         borderBottomColor: '#CCC',
       }}>
-        <FlatList horizontal data={this.props.slideList} style={{
+        <FlatList horizontal 
+        data={this.state.slideList} 
+        extraData={this.state.slideList} 
+        style={{
           width: '100%',
           height: height,
         }}
@@ -155,11 +221,17 @@ export default class UISlider extends React.Component {
         ref={(ref) => { this.flatListRef = ref; }}
         onScroll={(e) => {
           this.onScrollSlide(e);
-        }} onScrollBeginDrag={() => {
+        }}
+        onScrollBeginDrag={() => {
           this.onScrollBegin();
-        }} onScrollEndDrag={() => {
+        }}
+        onScrollEndDrag={() => {
           this.onScrollEnd();
-        }} renderItem={({item, index, separators}) => (
+        }}
+        onMomentumScrollEnd={() => {
+          this.onScrollAnimEnd();
+        }}
+        renderItem={({item, index, separators}) => (
           <Image source={{uri: item.thumbnail}} style={{
             width: screenWidth,
             height: height,

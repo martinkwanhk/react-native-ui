@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, SafeAreaView, FlatList, Image} from 'react-native';
+import {StyleSheet, SafeAreaView} from 'react-native';
 
 import UISlider from './../layout/UISlider';
 

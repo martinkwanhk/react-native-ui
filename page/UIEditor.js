@@ -1,9 +1,9 @@
 import React from 'react';
-import {StyleSheet, KeyboardAvoidingView, View, ScrollView, Image, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 
-//import UIEditor from './../layout/UIEditor';
+import UIEditor from './../layout/UIEditor';
 
-export default class UIEditor extends React.Component {
+export default class UIEditorPage extends React.Component {
 
   constructor(props) {
     super(props);
@@ -16,25 +16,40 @@ export default class UIEditor extends React.Component {
     
   }
 
-  executeCommand(cmd) {
-
-  }
-
   render() {
     return (
-      <KeyboardAvoidingView style={styles.container}>
-        <View style={styles.header}>
-
-        </View>
+      <View style={styles.container}>
         
-        <View style={styles.editable}>
-
+        <View style={styles.header}>
+          <Text>Some title here</Text>
         </View>
 
-        <ScrollView style={styles.menu} horizontal={true}>
+        <UIEditor 
+          style={styles.editor}
+          uploadImage={(base64, callback) => {
+            let data = {
+              key: '99Consulting',
+              ext: 'jpg',
+              base64: 'data:image/jpeg;base64,' + base64,
+            };
+            fetch('https://api.onmygrad.com/corn/upload-image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+              },
+              body: Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&'),
+            })
+            .then((response) => response.json())
+            .then((responseJson) => {
+              callback(responseJson.success == 1 ? true : false, responseJson.content);
+            })
+            .catch((error) => {
+              console.error(error);
+              callback(false);
+            });
+          }} />
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 
@@ -44,42 +59,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    width: '100%',
-    height: '100%',
   },
 
   header: {
-    flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
     width: '100%',
+    height: 50,
+    paddingLeft: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCC',
   },
 
-  editable: {
+  editor: {
     flex: 1,
     width: '100%',
-  },
-
-  menu: {
-    flex: 1,
-    flexDirection: 'row',
-    width: '100%',
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingLeft: 5,
-    paddingRight: 5,
-    borderTopColor: '#CCC',
-    borderTopWidth: 1,
-  },
-  menuBtn: {
-    
-  },
-  menuBtnImg: {
-
-  },
-  menuDivider: {
-    
   },
 
 });

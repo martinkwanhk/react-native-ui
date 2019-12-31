@@ -1,0 +1,299 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+<title>OMG Editor</title>
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap" rel="stylesheet">
+<style>
+
+/* Page style */
+@charset "utf-8";
+@font-face {
+	font-family: mellony;
+	src: url(font/mellonydrybrush.ttf);
+}
+:root {
+	--theme-color: #bf9b69;
+	--theme-color-light: #e5c59a;
+	--theme-color-dark: #6c4a31;
+	--theme-color-grey: #7d7d7d;
+}
+
+* {
+	color: #333;
+	font-family: 'Noto Sans', sans-serif, "微軟正黑體","Microsoft YaHei","宋體",Arial,"Microsoft JhengHei" !important;
+	-webkit-box-sizing: border-box;
+		 -moz-box-sizing: border-box;
+					box-sizing: border-box;
+					-webkit-text-size-adjust: 100%;
+}
+
+html, body {
+	padding: 0px;
+	margin: 0px auto;
+	text-align: center;
+}
+
+body {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	background-color: #fff;
+	background-size: contain;
+}
+
+div, span, p {
+	font-size: inherit;
+	font-weight: inherit;
+	color: inherit;
+}
+p {
+	padding: 0;
+	margin: 0;
+}
+img {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 240px;
+}
+ul {
+	margin: 0;
+	padding: 0;
+}
+a {
+	text-decoration: underline;
+}
+a, span, i, b, u, strong, strike, sup, sub {
+	color: inherit;
+	font-size: inherit;
+}
+
+/* Editor style */
+.editable {
+  display: inline-block;
+  position: relative;
+	width: 100%;
+}
+.editable #editable {
+	display: inline-block;
+	width: 100%;
+	min-height: 100%;
+	padding: 10px 10px;
+	font-size: 14px;
+	text-align: left;
+	background-color: #FFF;
+}
+.editable #editable:focus {
+	outline: none;
+}
+.editable #editable h1 {
+	margin-top: 0;
+	font-size: 18px;
+	font-weight: bold;
+}
+.editable #editable p {
+	font-size: 14px;
+}
+.editable #editable ul,
+.editable #editable ol {
+	padding-left: 1.5em;
+}
+.editable #editable img {
+	display: inline-block;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 240px;
+	margin-bottom: 10px;
+}
+.editable #editable sub,
+.editable #editable sup {
+	font-size: 12px;
+}
+.editable textarea[name=html] {
+	display: inline-block;
+	width: 100%;
+	height: 400px;
+	font-size: 12px;
+}
+
+/* Page style */
+
+body {
+	overflow: hidden !important;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="editable">
+  <div id="editable" contenteditable>
+    <p><br></p>
+  </div>
+</div>
+
+<script>
+
+// On press enter
+document.getElementById('editable').onkeypress = function(e) {
+	if (e.keyCode == 13) {
+		document.execCommand('formatBlock', false, 'p');
+	}
+}
+document.getElementById('editable').onkeyup = function(e) {
+	if (document.getElementById('editable').innerHTML.length == 0) {
+		document.execCommand('formatBlock', false, 'p');
+		setTimeout(function() {
+			document.getElementById('editable').focus();
+		}, 100);
+	}
+};
+
+// Range & selection of content editable
+document.getElementById('editable').onfocus = function(e) {
+	if (savedSelection) {
+		restoreSelection(document.getElementById('editable'), savedSelection);
+	}
+}
+document.getElementById('editable').onblur = function(e) {
+	savedSelection = saveSelection(document.getElementById('editable'));
+}
+
+// Init content editable property
+document.execCommand('formatBlock', false, 'p');
+
+
+// From webview
+window.onmessage = function(e) {
+	let data = false;
+	try {
+		data = JSON.parse(e.data);
+	} catch (e) {
+		console.error('invalid message format');
+		return;
+	}
+	if (data.action == 'command') {
+		switch (data.command) {
+			case 'h1':
+			case 'h2':
+			case 'p':
+				document.execCommand('formatBlock', false, data.command);
+				break;
+			case 'createlink':
+				url = prompt('Enter the link here: ', 'http://');
+				document.execCommand(data.command, false, url);
+				break;
+			case 'insertimage':
+				document.getElementById('editable').focus();
+				document.execCommand('insertimage', false, data.src);
+				setTimeout(function() {
+					document.execCommand('insertText', false, '\r\n');
+				}, 100);
+				let imgList = document.getElementsByTagName('img');
+				for (let i in imgList) {
+					let img = imgList[i];
+					img.onclick = function(e) {
+						if (confirm('Delete this image?')) {
+							img.remove();
+						}
+					}
+				}
+				break;
+			default:
+				document.execCommand(data.command, false, null);
+				break;
+		}
+	}
+}
+
+// To webview
+function postmessage(msg) {
+	window.postMessage(msg, '*');
+	try {
+		window.ReactNativeWebView.postMessage(msg);
+	} catch (e) {}
+	try {
+		window.ReactNativeWebview.postMessage(msg, '*');
+	} catch (e) {}
+}
+
+
+// Editor carat
+var saveSelection, restoreSelection;
+var savedSelection;
+
+if (window.getSelection && document.createRange) {
+  saveSelection = function(containerEl) {
+    var range = window.getSelection().getRangeAt(0);
+    var preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(containerEl);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    var start = preSelectionRange.toString().length;
+
+    return {
+      start: start,
+      end: start + range.toString().length
+    }
+  };
+
+  restoreSelection = function(containerEl, savedSel) {
+    var charIndex = 0, range = document.createRange();
+    range.setStart(containerEl, 0);
+    range.collapse(true);
+    var nodeStack = [containerEl], node, foundStart = false, stop = false;
+    
+    while (!stop && (node = nodeStack.pop())) {
+      if (node.nodeType == 3) {
+        var nextCharIndex = charIndex + node.length;
+        if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
+          range.setStart(node, savedSel.start - charIndex);
+          foundStart = true;
+        }
+        if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex) {
+          range.setEnd(node, savedSel.end - charIndex);
+          stop = true;
+        }
+        charIndex = nextCharIndex;
+      } else {
+        var i = node.childNodes.length;
+        while (i--) {
+          nodeStack.push(node.childNodes[i]);
+        }
+      }
+    }
+
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+} else if (document.selection && document.body.createTextRange) {
+  saveSelection = function(containerEl) {
+    var selectedTextRange = document.selection.createRange();
+    var preSelectionTextRange = document.body.createTextRange();
+    preSelectionTextRange.moveToElementText(containerEl);
+    preSelectionTextRange.setEndPoint("EndToStart", selectedTextRange);
+    var start = preSelectionTextRange.text.length;
+
+    return {
+      start: start,
+      end: start + selectedTextRange.text.length
+    }
+  };
+
+  restoreSelection = function(containerEl, savedSel) {
+    var textRange = document.body.createTextRange();
+    textRange.moveToElementText(containerEl);
+    textRange.collapse(true);
+    textRange.moveEnd("character", savedSel.end);
+    textRange.moveStart("character", savedSel.start);
+    textRange.select();
+  };
+}
+
+</script>
+
+</body>
+</html>
