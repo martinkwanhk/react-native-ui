@@ -33,12 +33,16 @@ export default class UISlider extends React.Component {
       slideList.push(this.props.slideList[0]);
       this.setState({
         slideList: slideList,
-        currIdx: this.state.slideLoop ? 1 : 0,
+        currIdx: 1,
+      });
+    } else {
+      this.setState({
+        slideList: this.props.slideList,
+        currIdx: 0,
       });
     }
-    let self = this;
     setTimeout(() => {
-      self.startScroll();
+      this.startScroll();
     }, 10);
   }
 
@@ -49,15 +53,14 @@ export default class UISlider extends React.Component {
   }
 
   startScroll() {
-    this.flatListRef.scrollToIndex({
-      animated: true,
-      index: this.state.currIdx,
+    this.flatListRef.scrollToOffset({
+      animated: false,
+      offset: this.state.currIdx * screenWidth,
     });
     this.setAutoScroll();
   }
 
   setAutoScroll() {
-    console.log('auto scroll' + new Date().getTime());
     var self = this;
     if (this.state.timeout) {
       clearTimeout(this.state.timeout);
@@ -130,7 +133,7 @@ export default class UISlider extends React.Component {
         if (this.state.dragDirection == 1) {
           idx -= 1;
           if (idx <= 0) {
-            jumpIdx = this.state.slideList.length - 1;
+            jumpIdx = this.state.slideList.length - 2;
           }
         }
       }
@@ -165,9 +168,9 @@ export default class UISlider extends React.Component {
         }
       }
     }
-    this.flatListRef.scrollToIndex({
+    this.flatListRef.scrollToOffset({
       animated: true,
-      index: idx,
+      offset: idx * screenWidth,
     });
     this.setState({
       initialDragDirection: 0,
@@ -180,16 +183,24 @@ export default class UISlider extends React.Component {
     let self = this;
     setTimeout(() => {
       if (jumpIdx !== false) {
-        self.setState({
-          currIdx: jumpIdx,
-        });
-        self.flatListRef.scrollToIndex({
-          animated: false,
-          index: jumpIdx,
-        });
+        self.onScrollAdjust(jumpIdx);
+      } else {
+        self.setAutoScroll();
       }
-      self.setAutoScroll();
     }, 500);
+    console.log(idx + ',' + jumpIdx)
+  }
+
+  onScrollAdjust(idx) {
+    console.log(idx);
+    this.flatListRef.scrollToOffset({
+      animated: false,
+      offset: idx * screenWidth,
+    });
+    this.setState({
+      currIdx: idx,
+    });
+    this.setAutoScroll();
   }
 
   onScrollAnimEnd() {
