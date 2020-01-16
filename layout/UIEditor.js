@@ -76,6 +76,8 @@ export default class UIEditor extends React.Component {
             ref={r => (this.webref = r)}
             source={htmlFile}
             originWhitelist={['*']}
+            automaticallyAdjustContentInsets={false}
+            scrollEnabled={true}
             onMessage={(msg) => {
 
             }}
