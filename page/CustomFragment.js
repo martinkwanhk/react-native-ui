@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EEE',
   },
   itemText: {
-    color: '#5d5d5d',
+    color: '#4e4e4e',
     fontSize: 14,
     textAlign: 'left',
   },
