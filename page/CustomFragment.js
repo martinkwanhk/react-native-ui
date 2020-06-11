@@ -22,7 +22,9 @@ export default class CustomFragment extends React.Component {
     return (
       <SafeAreaView style={styles.container}>
         <FlatList style={styles.content} data={this.state.componentList} renderItem={({item}) => (
-          <TouchableOpacity style={styles.item} navigation={this.props.navigation} onPress={() => this.props.navigation.navigate(item.page, {})}>
+          <TouchableOpacity style={styles.item} navigation={this.props.navigation} onPress={() => {
+            this.props.navigation.navigate(item.page, {});
+          }}>
             <Text style={styles.itemText}>{item.name}</Text>
           </TouchableOpacity>
         )} />
